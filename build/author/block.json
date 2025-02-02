@@ -46,9 +46,6 @@
     }
   },
   "attributes": {
-    "taxonomy": {
-      "type": "string"
-    },
     "emptyLabel": {
       "type": "string",
       "default": ""
@@ -64,6 +61,6 @@
   "textdomain": "query-filter",
   "editorScript": "file:./index.js",
   "style": "query-filter-view",
-  "viewScriptModule": "file:./view.js",
+  "viewScriptModule": "query-filter-taxonomy-view-script-module",
   "render": "file:./render.php"
 }
