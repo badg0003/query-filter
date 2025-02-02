@@ -10,6 +10,8 @@ namespace HM\Query_Loop_Filter;
 
 use WP_HTML_Tag_Processor;
 use WP_Query;
+use WP_REST_Response;
+use WP_Error;
 
 /**
  * Connect namespace methods to hooks and filters.
@@ -30,6 +32,9 @@ function bootstrap(): void
 
 	// Query.
 	add_filter('render_block_core/query', __NAMESPACE__ . '\\render_block_query', 10, 3);
+
+	// Years.
+	add_action('rest_api_init', __NAMESPACE__ . '\\filter_register_rest_route');
 }
 
 /**
@@ -57,6 +62,7 @@ function register_blocks(): void
 	register_block_type(ROOT_DIR . '/build/taxonomy');
 	register_block_type(ROOT_DIR . '/build/post-type');
 	register_block_type(ROOT_DIR . '/build/author');
+	register_block_type(ROOT_DIR . '/build/date');
 }
 
 /**
@@ -121,6 +127,9 @@ function pre_get_posts_transpose_query_vars(WP_Query $query): void
 			} // Handle author filters.
 			elseif ('author' === $param_key) {
 				$query->set('author_name', $value);
+			} elseif ('date' === $param_key) {
+				$year = absint($value);
+				$query->set('year', $year);
 			} else {
 				// Other options should map directly to query vars.
 				$clean_key = sanitize_key($param_key);
@@ -233,4 +242,41 @@ function render_block_query($block_content, $block)
 	$block_content->set_attribute('data-wp-router-region', 'query-' . ($block['attrs']['queryId'] ?? 0));
 
 	return (string) $block_content;
+}
+
+/**
+ * Registers a REST API route for querying years.
+ *
+ * @return void
+ */
+function filter_register_rest_route(): void
+{
+	\register_rest_route('query-filter/v1', '/years', [
+		'methods'             => 'GET',
+		'callback'            => __NAMESPACE__ . '\\query_filter_get_years', // Callback function to retrieve a list of years with published posts. Returns WP_REST_Response. No parameters.
+		'permission_callback' => '__return_true',
+	]);
+}
+
+/**
+ * Retrieves a list of years with published posts.
+ *
+ * @return WP_REST_Response List of years.
+ */
+function query_filter_get_years(): WP_REST_Response
+{
+	global $wpdb;
+	$results = $wpdb->get_col("
+		SELECT DISTINCT YEAR(post_date) 
+		FROM $wpdb->posts 
+		WHERE post_status = 'publish' 
+		AND post_type = 'post' 
+		ORDER BY post_date DESC
+	");
+
+	if (is_wp_error($results)) {
+		return new WP_REST_Response($results->get_error_message(), 500);
+	}
+
+	return rest_ensure_response($results);
 }
