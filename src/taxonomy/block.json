@@ -48,14 +48,19 @@
 			"type": "string",
 			"default": ""
 		},
-		"label": {
-			"type": "string"
-		},
-		"showLabel": {
-			"type": "boolean",
-			"default": true
-		}
-	},
+                "label": {
+                        "type": "string"
+                },
+                "showLabel": {
+                        "type": "boolean",
+                        "default": true
+                },
+                "displayType": {
+                        "type": "string",
+                        "enum": [ "select", "buttons", "checkboxes" ],
+                        "default": "select"
+                }
+        },
 	"textdomain": "query-filter",
 	"editorScript": "file:./index.js",
 	"style": "query-filter-view",

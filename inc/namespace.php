@@ -111,38 +111,54 @@ function pre_get_posts_transpose_query_vars(WP_Query $query): void
 	}
 
 	// Map get params to this query.
-	foreach ($_GET as $key => $value) {
-		if (strpos($key, $prefix) === 0) {
-			$param_key = str_replace($prefix, '', $key);
-			$value = sanitize_text_field(urldecode(wp_unslash($value)));
+        foreach ($_GET as $key => $value) {
+                if (strpos($key, $prefix) === 0) {
+                        $param_key = str_replace($prefix, '', $key);
+                        $unslashed_value = wp_unslash($value);
 
-			// Handle taxonomies specifically.
-			if (get_taxonomy($param_key)) {
-				$tax_query['relation'] = 'AND';
-				$tax_query[] = [
-					'taxonomy' => $param_key,
-					'terms' => [$value],
-					'field' => 'slug',
-				];
-			} // Handle author filters.
-			elseif ('author' === $param_key) {
-				$query->set('author_name', $value);
-			} elseif ('date' === $param_key) {
-				$year = absint($value);
-				$query->set('year', $year);
-			} else {
-				// Other options should map directly to query vars.
-				$clean_key = sanitize_key($param_key);
+                        // Handle taxonomies specifically.
+                        if (get_taxonomy($param_key)) {
+                                $terms = [];
 
-				if (! in_array($clean_key, array_keys($valid_keys), true)) {
-					continue;
-				}
+                                if (is_array($unslashed_value)) {
+                                        $terms = array_filter(array_map('sanitize_title', $unslashed_value));
+                                } else {
+                                        $sanitized_value = sanitize_text_field(urldecode($unslashed_value));
 
-				$query->set(
-					$clean_key,
-					$value
-				);
-			}
+                                        if ($sanitized_value !== '') {
+                                                $terms = array_filter(array_map('sanitize_title', explode(',', $sanitized_value)));
+                                        }
+                                }
+
+                                if (! empty($terms)) {
+                                        $tax_query['relation'] = 'AND';
+                                        $tax_query[] = [
+                                                'taxonomy' => $param_key,
+                                                'terms' => $terms,
+                                                'field' => 'slug',
+                                        ];
+                                }
+                        } // Handle author filters.
+                        elseif ('author' === $param_key) {
+                                $value = sanitize_text_field(urldecode($unslashed_value));
+                                $query->set('author_name', $value);
+                        } elseif ('date' === $param_key) {
+                                $year = absint($unslashed_value);
+                                $query->set('year', $year);
+                        } else {
+                                // Other options should map directly to query vars.
+                                $clean_key = sanitize_key($param_key);
+
+                                if (! in_array($clean_key, array_keys($valid_keys), true)) {
+                                        continue;
+                                }
+
+                                $value = sanitize_text_field(urldecode($unslashed_value));
+                                $query->set(
+                                        $clean_key,
+                                        $value
+                                );
+                        }
 		}
 	}
 

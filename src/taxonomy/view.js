@@ -13,17 +13,50 @@ const updateURL = async ( action, value, name ) => {
 
 const { state } = store( 'query-filter', {
 	actions: {
-		*navigate( e ) {
-			e.preventDefault();
-			const { actions } = yield import(
-				'@wordpress/interactivity-router'
-			);
-			yield actions.navigate( e.target.value );
-		},
-		*search( e ) {
-			e.preventDefault();
-			const { ref } = getElement();
-			let action, name, value;
+                *navigate( e ) {
+                        e.preventDefault();
+                        const { actions } = yield import(
+                                '@wordpress/interactivity-router'
+                        );
+                        yield actions.navigate( e.target.value );
+                },
+                *toggleCheckboxes( e ) {
+                        e.preventDefault();
+                        const { ref } = getElement();
+                        const container = ref.closest('[data-query-filter-base-url]');
+
+                        if ( ! container ) {
+                                return;
+                        }
+
+                        const baseUrl = container.dataset.queryFilterBaseUrl;
+                        const queryVar = container.dataset.queryFilterQueryVar;
+                        const pageVar = container.dataset.queryFilterPageVar;
+                        const checkboxes = Array.from(
+                                container.querySelectorAll('input[type="checkbox"]')
+                        );
+                        const selected = checkboxes
+                                .filter( ( input ) => input.checked )
+                                .map( ( input ) => input.value )
+                                .filter( Boolean );
+                        const url = new URL( baseUrl, window.location.origin );
+
+                        url.searchParams.delete( queryVar );
+                        url.searchParams.delete( pageVar );
+
+                        if ( selected.length > 0 ) {
+                                url.searchParams.set( queryVar, selected.join( ',' ) );
+                        }
+
+                        const { actions } = yield import(
+                                '@wordpress/interactivity-router'
+                        );
+                        yield actions.navigate( url.toString() );
+                },
+                *search( e ) {
+                        e.preventDefault();
+                        const { ref } = getElement();
+                        let action, name, value;
 			if ( ref.tagName === 'FORM' ) {
 				const input = ref.querySelector( 'input[type="search"]' );
 				action = ref.action;

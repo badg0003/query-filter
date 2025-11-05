@@ -9,7 +9,7 @@ import {
 import { useSelect } from '@wordpress/data';
 
 export default function Edit( { attributes, setAttributes } ) {
-	const { taxonomy, emptyLabel, label, showLabel } = attributes;
+        const { taxonomy, emptyLabel, label, showLabel, displayType } = attributes;
 
 	const taxonomies = useSelect(
 		( select ) => {
@@ -69,41 +69,98 @@ export default function Edit( { attributes, setAttributes } ) {
 						) }
 						onChange={ ( label ) => setAttributes( { label } ) }
 					/>
-					<ToggleControl
-						label={ __( 'Show Label', 'query-filter' ) }
-						checked={ showLabel }
-						onChange={ ( showLabel ) =>
-							setAttributes( { showLabel } )
-						}
-					/>
-					<TextControl
-						label={ __( 'Empty Choice Label', 'query-filter' ) }
-						value={ emptyLabel }
-						placeholder={ __( 'All', 'query-filter' ) }
-						onChange={ ( emptyLabel ) =>
-							setAttributes( { emptyLabel } )
-						}
-					/>
-				</PanelBody>
-			</InspectorControls>
-			<div { ...useBlockProps( { className: 'wp-block-query-filter' } ) }>
-				{ showLabel && (
-					<label className="wp-block-query-filter-taxonomy__label wp-block-query-filter__label">
-						{ label }
-					</label>
-				) }
-				<select
-					className="wp-block-query-filter-taxonomy__select wp-block-query-filter__select"
-					inert
-				>
-					<option>
-						{ emptyLabel || __( 'All', 'query-filter' ) }
-					</option>
-					{ terms.map( ( term ) => (
-						<option key={ term.slug }>{ term.name }</option>
-					) ) }
-				</select>
-			</div>
-		</>
-	);
+                                        <ToggleControl
+                                                label={ __( 'Show Label', 'query-filter' ) }
+                                                checked={ showLabel }
+                                                onChange={ ( showLabel ) =>
+                                                        setAttributes( { showLabel } )
+                                                }
+                                        />
+                                        <SelectControl
+                                                label={ __( 'Display As', 'query-filter' ) }
+                                                value={ displayType }
+                                                options={ [
+                                                        {
+                                                                label: __( 'Dropdown', 'query-filter' ),
+                                                                value: 'select',
+                                                        },
+                                                        {
+                                                                label: __( 'Button List', 'query-filter' ),
+                                                                value: 'buttons',
+                                                        },
+                                                        {
+                                                                label: __( 'Checkboxes', 'query-filter' ),
+                                                                value: 'checkboxes',
+                                                        },
+                                                ] }
+                                                onChange={ ( displayType ) =>
+                                                        setAttributes( { displayType } )
+                                                }
+                                        />
+                                        <TextControl
+                                                label={ __( 'Empty Choice Label', 'query-filter' ) }
+                                                value={ emptyLabel }
+                                                placeholder={ __( 'All', 'query-filter' ) }
+                                                onChange={ ( emptyLabel ) =>
+                                                        setAttributes( { emptyLabel } )
+                                                }
+                                        />
+                                </PanelBody>
+                        </InspectorControls>
+                        <div { ...useBlockProps( { className: 'wp-block-query-filter' } ) }>
+                                { showLabel && (
+                                        <label className="wp-block-query-filter-taxonomy__label wp-block-query-filter__label">
+                                                { label }
+                                        </label>
+                                ) }
+                                { displayType === 'buttons' && (
+                                        <div className="wp-block-query-filter-taxonomy__buttons">
+                                                <button
+                                                        className="wp-block-query-filter-taxonomy__button"
+                                                        type="button"
+                                                        disabled
+                                                >
+                                                        { emptyLabel || __( 'All', 'query-filter' ) }
+                                                </button>
+                                                { terms.map( ( term ) => (
+                                                        <button
+                                                                key={ term.slug }
+                                                                className="wp-block-query-filter-taxonomy__button"
+                                                                type="button"
+                                                                disabled
+                                                        >
+                                                                { term.name }
+                                                        </button>
+                                                ) ) }
+                                        </div>
+                                ) }
+                                { displayType === 'checkboxes' && (
+                                        <fieldset className="wp-block-query-filter-taxonomy__checkboxes">
+                                                { terms.map( ( term ) => (
+                                                        <label
+                                                                key={ term.slug }
+                                                                className="wp-block-query-filter-taxonomy__checkbox"
+                                                        >
+                                                                <input type="checkbox" disabled />
+                                                                { term.name }
+                                                        </label>
+                                                ) ) }
+                                        </fieldset>
+                                ) }
+                                { displayType === 'select' && (
+                                        <select
+                                                className="wp-block-query-filter-taxonomy__select wp-block-query-filter__select"
+                                                inert
+                                        >
+                                                <option>
+                                                        { emptyLabel || __( 'All', 'query-filter' ) }
+                                                </option>
+                                                { terms.map( ( term ) => (
+                                                        <option key={ term.slug }>{ term.name }</option>
+                                                ) ) }
+                                        </select>
+                                ) }
+                        </div>
+                </>
+        );
 }
