@@ -3,7 +3,44 @@
 }
 
 .wp-block-query-filter {
-	display: flex;
-	flex-direction: column;
-	justify-content: stretch;
+        display: flex;
+        flex-direction: column;
+        justify-content: stretch;
+}
+
+.wp-block-query-filter-taxonomy__buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--wp--style--block-gap, 0.5rem);
+}
+
+.wp-block-query-filter-taxonomy__button {
+        cursor: pointer;
+        border: 1px solid currentColor;
+        background: transparent;
+        padding: 0.5em 1em;
+}
+
+.wp-block-query-filter-taxonomy__button.is-active {
+        background: currentColor;
+        color: var(--wp--style--color--background, #fff);
+}
+
+.wp-block-query-filter-taxonomy__checkboxes {
+        border: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5em;
+}
+
+.wp-block-query-filter-taxonomy__checkboxes legend {
+        margin-bottom: 0.5em;
+}
+
+.wp-block-query-filter-taxonomy__checkbox {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5em;
 }

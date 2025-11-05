@@ -59,6 +59,15 @@
     "showLabel": {
       "type": "boolean",
       "default": true
+    },
+    "displayType": {
+      "type": "string",
+      "enum": [
+        "select",
+        "buttons",
+        "checkboxes"
+      ],
+      "default": "select"
     }
   },
   "textdomain": "query-filter",
